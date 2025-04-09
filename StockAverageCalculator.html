@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Average Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #001777;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .calculator {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        h2 {
+            color: #001777;
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        .purchase-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .purchase-header {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #444;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .input-group {
+            flex: 1;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .result-container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .result-value {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .highlight {
+            color: #3498db;
+        }
+        
+        .add-btn {
+            background-color: #001777;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .delete-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .about-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>STOCK AVERAGE CALCULATOR</h2>
+        <p class="description"><b>Finoledge Stock Average Calculator</b> helps investors smartly manage their portfolio by calculating the weighted average price of stocks purchased at different levels. This essential tool eliminates guesswork - simply input your buy prices and quantities to instantly see your true break-even point, position sizing, and potential profit/loss scenarios. Perfect for implementing dollar-cost averaging strategies or evaluating existing holdings, it brings clarity to your investment decisions with precise, actionable data at your fingertips. Finoledge - Your Partner in Smarter Investing!</p>
+        
+        <div id="purchases-container">
+            <!-- Purchase 1 (default) -->
+            <div class="purchase-group" data-id="1">
+                <div class="purchase-header">Purchase #1</div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Buy Price</label>
+                        <input type="number" class="price-input" min="0" step="0.01" Placeholder="0" oninput="calculateAverage()">
+                    </div>
+                    <div class="input-group">
+                        <label>Quantity</label>
+                        <input type="number" class="quantity-input" min="0" Placeholder="0" oninput="calculateAverage()">
+                    </div>
+                </div>
+                <button class="delete-btn" disabled>✕</button>
+            </div>
+            
+            <!-- Purchase 2 (default) -->
+            <div class="purchase-group" data-id="2">
+                <div class="purchase-header">Purchase #2</div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Buy Price</label>
+                        <input type="number" class="price-input" min="0" step="0.01" Placeholder="0" oninput="calculateAverage()">
+                    </div>
+                    <div class="input-group">
+                        <label>Quantity</label>
+                        <input type="number" class="quantity-input" min="0" Placeholder="0" oninput="calculateAverage()">
+                    </div>
+                </div>
+                <button class="delete-btn" disabled>✕</button>
+            </div>
+        </div>
+        
+        <button class="add-btn" onclick="addPurchase()">
+            <span>+</span> Add new purchase
+        </button>
+        
+        <div class="result-container">
+            <div class="result-item">
+                <span class="result-label">Total quantity</span>
+                <span class="result-value" id="total-quantity">0</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Average price</span>
+                <span class="result-value highlight" id="average-price">0</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Total Amount</span>
+                <span class="result-value" id="total-amount">0</span>
+            </div>
+        </div>
+        <div class="about-section">
+            Finoledge Stock Average Calculator
+        </div>
+    </div>
+
+    <script>
+let activePurchases = [1, 2]; // Track active purchase IDs
+
+// When adding a new purchase:
+function getNextPurchaseNumber() {
+    // Find the first missing number in sequence
+    for (let i = 1; i <= activePurchases.length + 1; i++) {
+        if (!activePurchases.includes(i)) {
+            return i;
+        }
+    }
+    return activePurchases.length + 1;
+}
+
+// When deleting a purchase:
+function deletePurchase(id) {
+    // Remove from activePurchases array
+    activePurchases = activePurchases.filter(item => item !== id);
+    
+    // Renumber all remaining purchases
+    renumberPurchases();
+}
+
+function renumberPurchases() {
+    // Sort and renumber all active purchases
+    activePurchases.sort((a, b) => a - b);
+    
+    // Update the UI numbering
+    activePurchases.forEach((id, index) => {
+        const section = document.getElementById(`purchase-${id}`);
+        section.querySelector('.purchase-header').textContent = 
+            `${index === 0 ? 'First' : index === 1 ? 'Second' : `Purchase #${index + 1}`} Purchase`;
+    });
+}
+        let purchaseCount = 2; // Start with 2 default purchases
+        
+        function calculateAverage() {
+            let totalAmount = 0;
+            let totalQuantity = 0;
+            
+            // Get all purchase groups
+            const purchases = document.querySelectorAll('.purchase-group');
+            
+            purchases.forEach(purchase => {
+                const price = parseFloat(purchase.querySelector('.price-input').value) || 0;
+                const quantity = parseFloat(purchase.querySelector('.quantity-input').value) || 0;
+                
+                totalAmount += price * quantity;
+                totalQuantity += quantity;
+            });
+            
+            // Calculate average price (avoid division by zero)
+            const averagePrice = totalQuantity > 0 ? totalAmount / totalQuantity : 0;
+            
+            // Update results
+            document.getElementById('total-quantity').textContent = totalQuantity;
+            document.getElementById('average-price').textContent = averagePrice.toFixed(2);
+            document.getElementById('total-amount').textContent = totalAmount.toFixed(2);
+        }
+        
+        function addPurchase() {
+            purchaseCount++;
+            
+            const newPurchase = document.createElement('div');
+            newPurchase.className = 'purchase-group';
+            newPurchase.dataset.id = purchaseCount;
+            
+            newPurchase.innerHTML = `
+                <div class="purchase-header">Purchase #${purchaseCount}</div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Buy Price</label>
+                        <input type="number" class="price-input" min="0" step="0.01" value="0" oninput="calculateAverage()">
+                    </div>
+                    <div class="input-group">
+                        <label>Quantity</label>
+                        <input type="number" class="quantity-input" min="0" value="0" oninput="calculateAverage()">
+                    </div>
+                </div>
+                <button class="delete-btn" onclick="deletePurchase(${purchaseCount})">✕</button>
+            `;
+            
+            document.getElementById('purchases-container').appendChild(newPurchase);
+        }
+        
+        function deletePurchase(id) {
+            const purchaseToDelete = document.querySelector(`.purchase-group[data-id="${id}"]`);
+            if (purchaseToDelete) {
+                purchaseToDelete.remove();
+                calculateAverage();
+            }
+        }
+        
+        // Initialize calculator
+        window.onload = function() {
+            calculateAverage();
+        };
+    </script>
+</body>
+</html>
